@@ -163,6 +163,7 @@ public class MiniProject {
             System.out.println("no game created");
             System.out.println("please create the game at first");
         } else {
+            announcement_of_day();
             for (int i = 0; i < playersNum; i++) {
                 if (players[i].Role.equals("mafia"))
                     System.out.println(playersNewName[i] + ": mafia");
@@ -185,6 +186,7 @@ public class MiniProject {
                     System.out.println("make sure everybody has a role ans try again");
                 }
             }
+            System.out.println(" pleas enter the voter and voted name for voting in the day");
             isNight = false;
             gameIsStarted = true;
         }
@@ -202,6 +204,10 @@ public class MiniProject {
             if (voter_name.equals("end_vote")) {
                 end_vote();
                 return;
+            }
+            if (voter_name.equals("get_game_state")){
+                get_game_state();
+                continue;
             }
             votee_name = scanner.next();
             Outer:
@@ -297,7 +303,7 @@ public class MiniProject {
 
     public static void nigh_duty() {
         boolean isSilencerSilentAnyone = false;
-        System.out.println("please enter the voter and votee name for night");
+        System.out.println("please enter the voter and votee name for night (just the ones who can be woken up)");
         while (true) {
             first_player = scanner.next();
             if (first_player.equals("end_night")) {
@@ -513,8 +519,8 @@ public class MiniProject {
                     break;
                 case "start_game":
                     playesr_list();
-                    announcement_of_day();
-                    System.out.println(" pleas enter the voter and voted name");
+                    //announcement_of_day();
+                    //System.out.println(" pleas enter the voter and voted name for voting in the day");
                     vote();
                     break;
                 case "get_game_state":
