@@ -1,7 +1,8 @@
- class Player {
+class Player {
     //parent class for roles in the game.
      String Name ;
      String Role ;
+     public boolean is_saved_is_bulletproof = false ;
      public boolean is_silence_now = false ;
      public boolean beVoted = false ;
    public boolean isKilled = false ;
