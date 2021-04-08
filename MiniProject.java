@@ -1,8 +1,9 @@
 import java.util.Scanner;
 
 public class MiniProject {
-    public static boolean Hase_role = false ;
-    public static int has_same_voteNum_atNigh = 0 ;
+    public static String wsap_or_not = null ;
+    public static boolean Hase_role = false;
+    public static int has_same_voteNum_atNigh = 0;
     public static int num_mafia = 0;
     public static int num_villager = 0;
     public static String first_player = null;
@@ -154,7 +155,7 @@ public class MiniProject {
                 System.out.println("please enter the right rol");
             }
         }
-        Hase_role = true ;
+        Hase_role = true;
         nameFound = false;
     }
 
@@ -164,8 +165,7 @@ public class MiniProject {
         else if (gameIsCreated == false) {
             System.out.println("no game created");
             System.out.println("please create the game at first");
-        }
-        else if (Hase_role == false )
+        } else if (Hase_role == false)
             System.out.println("one or more player do not have a role");
         else {
             announcement_of_day();
@@ -198,8 +198,8 @@ public class MiniProject {
     }
 
     public static void announcement_of_day() {
-        if (isNight == false)
-            DayNum++;
+        //if (isNight == false)
+        DayNum++;
         System.out.println("Day " + DayNum);
     }
 
@@ -210,7 +210,7 @@ public class MiniProject {
                 end_vote();
                 return;
             }
-            if (voter_name.equals("get_game_state")){
+            if (voter_name.equals("get_game_state")) {
                 get_game_state();
                 continue;
             }
@@ -219,13 +219,13 @@ public class MiniProject {
             for (int i = 0; i < playersNum; i++) {
                 if (voter_name.equals(playersNewName[i])) {
                     nameFound = true;
-                    if (players[i].isSilent == false){
+                    if (players[i].isSilent == false) {
                         for (int j = 0; j < playersNum; j++) {
                             if (votee_name.equals(playersNewName[j])) {
                                 nameFound_votee = true;
-                                if (players[i].Role.equals("silencer"))
-                                    System.out.println("voter is silence");
-                                else if (players[i].isKilled == true )
+//                                if (players[i].Role.equals("silencer"))
+//                                    System.out.println("voter is silence");
+                                /*else*/ if (players[i].isKilled == true)
                                     System.out.println("voter is dead");
                                 else if (players[j].isKilled == true)
                                     System.out.println("votee already dead");
@@ -238,8 +238,7 @@ public class MiniProject {
                         }
                         if (nameFound_votee == false)
                             System.out.println("user not found");
-                }
-                    else System.out.println("voter has been silenced by silencer at night");
+                    } else System.out.println("voter has been silenced by silencer at night");
                 } else nameFound = false;
             }
             if (nameFound == false)
@@ -256,16 +255,19 @@ public class MiniProject {
     public static void end_vote() {
         Player is_killed = null;
         int max_num_beVoted = 0;
+        int max_num_sameVote = 0;
         for (int i = 0; i < playersNum; i++) {
             if (players[i].VotedNum > max_num_beVoted) {
                 max_num_beVoted = players[i].VotedNum;
                 max_beVoted = players[i].Name;
                 max_beVoted_role = players[i].Role;
                 is_killed = players[i];
-            } else if (players[i].VotedNum == max_num_beVoted && max_num_beVoted > 0)
+            } else if (players[i].VotedNum == max_num_beVoted && max_num_beVoted > 0) {
+                max_num_sameVote = max_num_beVoted;
                 has_same_voteNum++;
+            }
         }
-        if (has_same_voteNum > 0) {
+        if (has_same_voteNum > 0 && max_num_sameVote >= max_num_beVoted) {
             System.out.println("nobody died");
             for (int i = 0; i < playersNum; i++)
                 players[i].VotedNum = 0;
@@ -310,20 +312,55 @@ public class MiniProject {
             }
         }
     }
-
+    public static void swap_characters(){
+        String s1 = scanner.next();
+        String s2 = scanner.next();
+        for (int i = 0 ; i < playersNum ; i ++ ){
+            if (players[i].Name.equals(s1)){
+                if (players[i].isKilled == true )
+                    System.out.println("user is dead");
+                else {
+                    for(int j = 0 ; j < playersNum ; j ++){
+                        if (players[j].Name.equals(s2)){
+                            if (players[j].isKilled == true )
+                                System.out.println("user is dead");
+                            else {
+                                String temp = players[i].Name ;
+                                players[i].Name = players[j].Name;
+                                players[j].Name = temp ;
+                                System.out.println("swapped "+players[i].Name+" with "+players[j].Name);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     public static void nigh_duty() {
         boolean isSilencerSilentAnyone = false;
+        boolean mafia_has_voted = false ;
         System.out.println("please enter the voter and votee name for night (just the ones who can be woken up)");
         while (true) {
             first_player = scanner.next();
             if (first_player.equals("end_night")) {
-                vote_atNight();
-                return ;
+                wsap_or_not = scanner.next();
+                if (wsap_or_not.equals("not_swap")){
+                    chek_last_vote();
+                    counting_vote_atNight();
+                    return;}
+                else if (wsap_or_not.equals("swap_characters")){
+                    swap_characters();
+                    chek_last_vote();
+                    counting_vote_atNight();
+                    return;
+                }
             }
-            if (first_player.equals("get_game_state")){
+            if (first_player.equals("get_game_state")) {
                 get_game_state();
                 continue;
             }
+
             second_player = scanner.next();
             for (int i = 0; i < playersNum; i++) {
                 if (first_player.equals(players[i].Name)) {
@@ -338,7 +375,8 @@ public class MiniProject {
                                     if (players[j].isKilled == true)
                                         System.out.println("votee already dead");
                                     else {
-                                        players[j].VotedNum++;
+                                        //players[j].VotedNum++;
+                                        players[i].votee_name = players[j].Name;
                                     }
                                     break;
                                 } else nameFound_votee = false;
@@ -385,7 +423,8 @@ public class MiniProject {
                                     if (players[j].isKilled == true)
                                         System.out.println("votee already dead");
                                     else {
-                                        players[j].VotedNum++;
+                                        //players[j].VotedNum++;
+                                        players[i].votee_name = players[j].Name;
                                     }
                                     break;
                                 } else nameFound_votee = false;
@@ -399,12 +438,13 @@ public class MiniProject {
                                     if (players[j].isKilled == true)
                                         System.out.println("votee is already dead");
                                     else {
-                                        if (!isSilencerSilentAnyone) {
+                                        if (isSilencerSilentAnyone == false) {
                                             players[j].isSilent = true;
                                             isSilencerSilentAnyone = true;
-                                        }
-                                        else{
-                                            players[j].VotedNum++;
+                                            System.out.println(players[j].Name + " is silenced for next day");
+                                        } else {
+                                            //players[j].VotedNum++;
+                                            players[i].votee_name = players[j].Name;
                                         }
                                     }
                                     break;
@@ -421,105 +461,225 @@ public class MiniProject {
                 System.out.println("user not joined");
         }
     }
+    public static void chek_last_vote (){
+        for (int i = 0 ; i < playersNum ; i ++ ){
+            for (int j = 0 ; j < playersNum ; j ++ ){
+                if (players[i].votee_name == null)
+                    continue;
+                if (players[i].votee_name.equals(players[j].Name))
+                    players[j].VotedNum++;
+            }
+        }
+    }
 
     public static void get_game_state() {
         System.out.println("Mafia = " + num_mafia);
         System.out.println("Villager = " + num_villager);
     }
-    public static void vote_atNight () {
+
+    public static void counting_vote_atNight() {
         announcement_of_day();
-        int same_vote_num [] = new int [2] ;
-        int max_num_voted_atNight = 0 ;
+        int max = 0;
+        for (int i = 0; i < playersNum; i++) {
+            if (players[i].VotedNum > max)
+                max = players[i].VotedNum;
+        }
+        int sum = 0;
+        for (int i = 0; i < playersNum; i++) {
+            if (players[i].VotedNum == max)
+                sum++;
+        }
+        if (sum == 2) {
+            Player p1 = null, p2 = null;
+            for (int i = 0; i < playersNum; i++) {
+                if (players[i].VotedNum == max) {
+                    if (p1 == null)
+                        p1 = players[i];
+                    else
+                        p2 = players[i];
+                }
+            }
+            if (p1.isSaved_byDoctor) {
+                if (!(p2 instanceof Bulletproof)) {
+                    p2.isKilled = true;
+                    System.out.println(p2.Name + " is died");
+                    if (p2.Role.equals("doctor") || p2.Role.equals("detective") || p2.Role.equals("bulletproof") || p2.Role.equals("villager"))
+                        num_villager--;
+                    else if (p2.Role.equals("mafia") || p2.Role.equals("godfather") || p2.Role.equals("silencer"))
+                        num_mafia--;
+                } else {
+                    if (p2.lost_extraLife == true) {
+                        p2.isKilled = true;
+                        System.out.println(p2.Name + " is died");
+                        if (p2.Role.equals("doctor") || p2.Role.equals("detective") || p2.Role.equals("bulletproof") || p2.Role.equals("villager"))
+                            num_villager--;
+                        else if (p2.Role.equals("mafia") || p2.Role.equals("godfather") || p2.Role.equals("silencer"))
+                            num_mafia--;
+                    } else
+                        p2.lost_extraLife = true;
+                }
+            } else if (p2.isSaved_byDoctor) {
+                if (!(p2 instanceof Bulletproof)) {
+                    p1.isKilled = true;
+                    System.out.println(p1.Name + " is died");
+                    if (p1.Role.equals("doctor") || p1.Role.equals("detective") || p1.Role.equals("bulletproof") || p1.Role.equals("villager"))
+                        num_villager--;
+                    else if (p1.Role.equals("mafia") || p1.Role.equals("godfather") || p1.Role.equals("silencer"))
+                        num_mafia--;
+                } else {
+                    if (p1.lost_extraLife == true) {
+                        p1.isKilled = true;
+                        System.out.println(p1.Name + " is died");
+                        if (p1.Role.equals("doctor") || p1.Role.equals("detective") || p1.Role.equals("bulletproof") || p1.Role.equals("villager"))
+                            num_villager--;
+                        else if (p1.Role.equals("mafia") || p1.Role.equals("godfather") || p1.Role.equals("silencer"))
+                            num_mafia--;
+                    } else {
+                        p1.lost_extraLife = true;
+                    }
+                }
+            } else
+                System.out.println("nobody died");
+        }
+        if (sum == 1) {
+            Player p = null;
+            for (int i = 0; i < playersNum; i++) {
+                if (players[i].VotedNum == max) {
+                    p = players[i];
+                }
+            }
+            if (p.isSaved_byDoctor) {
+                System.out.println("mafia tried to kill " + p.Name+"but doctor saved him");
+            } else {
+                if (!(p instanceof Bulletproof)) {
+                    p.isKilled = true;
+                    System.out.println(p.Name + " is died");
+                    if (p.Role.equals("doctor") || p.Role.equals("detective") || p.Role.equals("bulletproof") || p.Role.equals("villager"))
+                        num_villager--;
+                    else if (p.Role.equals("mafia") || p.Role.equals("godfather") || p.Role.equals("silencer"))
+                        num_mafia--;
+                } else {
+                    if (p.lost_extraLife == true) {
+                        p.isKilled = true;
+                        System.out.println(p.Name + " is died");
+                        if (p.Role.equals("doctor") || p.Role.equals("detective") || p.Role.equals("bulletproof") || p.Role.equals("villager"))
+                            num_villager--;
+                        else if (p.Role.equals("mafia") || p.Role.equals("godfather") || p.Role.equals("silencer"))
+                            num_mafia--;
+                    } else System.out.println("nobody died");
+                }
+            }
+        }
+        if (sum > 2) {
+            System.out.println("nobody died");
+        }
+
+        if (num_villager <= num_mafia) {
+            System.out.println("Mafia won");
+            System.exit(1);
+        } else if (num_mafia == 0) {
+            System.out.println("Villager won");
+            System.exit(1);
+        } else {
+            has_same_voteNum_atNigh = 0;
+            for (int i = 0; i < playersNum; i++) {
+                players[i].VotedNum = 0;
+                players[i].votee_name = null ;
+            }
+            //to continue the game
+            System.out.println("enter the voter and votee name for day");
+            vote();
+        }
+
+
+    }
+
+    public static void vote_atNight() {
+        announcement_of_day();
+        int same_vote_num[] = new int[2];
+        int max_num_voted_atNight = 0;
+        int max_voteNume_same_night = 0;
         Player is_killed_atNight = null;
         Player is_bulletproof = null;
         Player is_savedBy_doctor = null;
-        for (int i = 0 ; i < playersNum ; i ++) {
+        for (int i = 0; i < playersNum; i++) {
             if (players[i].VotedNum > max_num_voted_atNight) {
                 max_num_voted_atNight = players[i].VotedNum;
                 max_beVoted = players[i].Name;
                 max_beVoted_role = players[i].Role;
-                if (players[i].isSaved_byDoctor == true ) {
+                if (players[i].isSaved_byDoctor == true) {
                     players[i].alive_byDoctor = true;
                     is_savedBy_doctor = players[i];
-                }
-                else if (players[i].Role.equals("bulletproof")) {
-                    if (players[i].lost_extraLife == false ) {
+                } else if (players[i].Role.equals("bulletproof")) {
+                    if (players[i].lost_extraLife == false) {
                         players[i].lost_extraLife = true;
-                        players[i].is_saved_is_bulletproof = true ;
+                        players[i].is_saved_is_bulletproof = true;
                         is_bulletproof = players[i];
-                    }
-                    else is_killed_atNight = players[i];
-                }
-                else
+                    } else is_killed_atNight = players[i];
+                } else
                     is_killed_atNight = players[i];
-            }
-            else if (players[i].VotedNum == max_num_voted_atNight && max_num_voted_atNight > 0)
+            } else if (players[i].VotedNum == max_num_voted_atNight && max_num_voted_atNight > 0) {
+                max_voteNume_same_night = max_num_voted_atNight;
                 has_same_voteNum_atNigh++;
+            }
         }
-         if (has_same_voteNum == 1 ){
-             int j = 0 ;
-             for (int i = 0 ; i < playersNum ; i++){
-                 if (players[i].VotedNum == max_num_voted_atNight ){
-                     same_vote_num[j] = i ;
-                     j ++ ;
-                 }
-         }
+        if (has_same_voteNum == 1) {
+            int j = 0;
+            for (int i = 0; i < playersNum; i++) {
+                if (players[i].VotedNum == max_num_voted_atNight) {
+                    same_vote_num[j] = i;
+                    j++;
+                }
+            }
         }
-          if (has_same_voteNum_atNigh == 1 ){
-             if (players[same_vote_num[0]].isSaved_byDoctor == true && players[same_vote_num[1]].isSaved_byDoctor == false ) {
-                 System.out.println(players[same_vote_num[1]].Name + " was killed");
-                 System.out.println("Mafia tried to kill " +players[same_vote_num[0]].Name+" but doctor saved him" );
-                 if (players[same_vote_num[1]].Role.equals("doctor") || players[same_vote_num[1]].Role.equals("detective") || players[same_vote_num[1]].Role.equals("bulletproof")|| players[same_vote_num[0]].Role.equals("villager"))
-                 num_villager--;
-                 else if (players[same_vote_num[1]].Role.equals("mafia") || players[same_vote_num[1]].Role.equals("godfather") || players[same_vote_num[1]].Role.equals("silencer"))
-                     num_mafia--;
-             }
-             else if (players[same_vote_num[0]].isSaved_byDoctor == false && players[same_vote_num[1]].isSaved_byDoctor == true ) {
-                 System.out.println(players[same_vote_num[0]].Name + " was killed");
-                 System.out.println("Mafia tried to kill " +players[same_vote_num[1]].Name+ " but doctor saved him" );
-                 if (players[same_vote_num[0]].Role.equals("doctor") || players[same_vote_num[0]].Role.equals("detective") || players[same_vote_num[0]].Role.equals("bulletproof")|| players[same_vote_num[0]].Role.equals("villager"))
-                     num_villager--;
-                 else if (players[same_vote_num[0]].Role.equals("mafia") || players[same_vote_num[0]].Role.equals("godfather") || players[same_vote_num[0]].Role.equals("silencer"))
-                     num_mafia--;
-             }
-             else if (players[same_vote_num[0]].isSaved_byDoctor == false && players[same_vote_num[1]].isSaved_byDoctor == false ) {
-                 System.out.println("nobody was killed");
-             }
-         }
-         else if (has_same_voteNum_atNigh == 0 ) {
-             if (is_killed_atNight == null) {
-                  if (is_savedBy_doctor !=null )
-                      System.out.println("mafia tried to kill "+ is_savedBy_doctor.Name + " but doctor saved him");
-                  else if (is_bulletproof != null )
-                      System.out.println("mafia tried to kill "+is_bulletproof.Name + " but he had shield");
-             }
-             else {
-                 System.out.println(is_killed_atNight.Name + " was killed");
-                 if (is_killed_atNight.Role.equals("doctor") || is_killed_atNight.Role.equals("detective") || is_killed_atNight.Role.equals("bulletproof") || is_killed_atNight.Role.equals("villager"))
-                     num_villager--;
-                 else if (is_killed_atNight.Role.equals("mafia") || is_killed_atNight.Role.equals("godfather") || is_killed_atNight.Role.equals("silencer"))
-                     num_mafia--;
-             }
-         }
-         else {
-              System.out.println("nobody died");
-          }
-         if (num_villager<= num_mafia ) {
-             System.out.println("Mafia won");
-             System.exit(1);
-         }
-         else if (num_mafia == 0) {
-             System.out.println("Villager won");
-             System.exit(1);
-         }
-         else  {
-             has_same_voteNum_atNigh = 0 ;
-             for (int i = 0 ; i <playersNum ; i ++)
-                 players[i].VotedNum = 0 ;
-             //to continue the game
-             System.out.println("enter the voter and votee name for day");
-             vote();
-         }
+        if (has_same_voteNum_atNigh == 1 && max_voteNume_same_night >= max_num_voted_atNight) {
+            if (players[same_vote_num[0]].isSaved_byDoctor == true && players[same_vote_num[1]].isSaved_byDoctor == false) {
+                System.out.println(players[same_vote_num[1]].Name + " was killed");
+                System.out.println("Mafia tried to kill " + players[same_vote_num[0]].Name + " but doctor saved him");
+                if (players[same_vote_num[1]].Role.equals("doctor") || players[same_vote_num[1]].Role.equals("detective") || players[same_vote_num[1]].Role.equals("bulletproof") || players[same_vote_num[0]].Role.equals("villager"))
+                    num_villager--;
+                else if (players[same_vote_num[1]].Role.equals("mafia") || players[same_vote_num[1]].Role.equals("godfather") || players[same_vote_num[1]].Role.equals("silencer"))
+                    num_mafia--;
+            } else if (players[same_vote_num[0]].isSaved_byDoctor == false && players[same_vote_num[1]].isSaved_byDoctor == true) {
+                System.out.println(players[same_vote_num[0]].Name + " was killed");
+                System.out.println("Mafia tried to kill " + players[same_vote_num[1]].Name + " but doctor saved him");
+                if (players[same_vote_num[0]].Role.equals("doctor") || players[same_vote_num[0]].Role.equals("detective") || players[same_vote_num[0]].Role.equals("bulletproof") || players[same_vote_num[0]].Role.equals("villager"))
+                    num_villager--;
+                else if (players[same_vote_num[0]].Role.equals("mafia") || players[same_vote_num[0]].Role.equals("godfather") || players[same_vote_num[0]].Role.equals("silencer"))
+                    num_mafia--;
+            } else if (players[same_vote_num[0]].isSaved_byDoctor == false && players[same_vote_num[1]].isSaved_byDoctor == false) {
+                System.out.println("nobody was killed");
+            }
+        } else if (has_same_voteNum_atNigh >= 2 && max_voteNume_same_night >= max_num_voted_atNight)
+            System.out.println("nobody died");
+        else {
+            if (is_killed_atNight == null) {
+                if (is_savedBy_doctor != null)
+                    System.out.println("mafia tried to kill " + is_savedBy_doctor.Name + " but doctor saved him");
+                else if (is_bulletproof != null)
+                    System.out.println("mafia tried to kill " + is_bulletproof.Name + " but he had shield");
+            } else {
+                System.out.println(is_killed_atNight.Name + " was killed");
+                if (is_killed_atNight.Role.equals("doctor") || is_killed_atNight.Role.equals("detective") || is_killed_atNight.Role.equals("bulletproof") || is_killed_atNight.Role.equals("villager"))
+                    num_villager--;
+                else if (is_killed_atNight.Role.equals("mafia") || is_killed_atNight.Role.equals("godfather") || is_killed_atNight.Role.equals("silencer"))
+                    num_mafia--;
+            }
+        }
+        if (num_villager <= num_mafia) {
+            System.out.println("Mafia won");
+            System.exit(1);
+        } else if (num_mafia == 0) {
+            System.out.println("Villager won");
+            System.exit(1);
+        } else {
+            has_same_voteNum_atNigh = 0;
+            for (int i = 0; i < playersNum; i++)
+                players[i].VotedNum = 0;
+            //to continue the game
+            System.out.println("enter the voter and votee name for day");
+            vote();
+        }
     }
 
     public static void main(String[] arg) {
@@ -540,8 +700,8 @@ public class MiniProject {
                     vote();
                     break;
                 //case "get_game_state":
-                    //get_game_state();
-                    //break;
+                //get_game_state();
+                //break;
             }
         }
     }
